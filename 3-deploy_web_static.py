@@ -1,55 +1,73 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-"""
-Module
-"""
-from fabric.api import local, put, run, env
+"""Tar, transfer, and deploy static html to webservers"""
+
+from fabric import api, decorators
+from fabric.contrib import files
 from datetime import datetime
+import os
 
-env.user = 'ubuntu'
-env.hosts = ['100.25.147.0', '3.90.85.162']
-
-
-def do_pack():
-    """
-    Targginng project directory into a packages as .tgz
-    """
-    now = datetime.now().strftime("%Y%m%d%H%M%S")
-    local('sudo mkdir -p ./versions')
-    path = './versions/web_static_{}'.format(now)
-    local('sudo tar -czvf {}.tgz web_static'.format(path))
-    name = '{}.tgz'.format(path)
-    if name:
-        return name
-    else:
-        return None
-
-
-def do_deploy(archive_path):
-    """Deploy the boxing package tgz file
-    """
-    try:
-        archive = archive_path.split('/')[-1]
-        path = '/data/web_static/releases/' + archive.strip('.tgz')
-        current = '/data/web_static/current'
-        put(archive_path, '/tmp')
-        run('mkdir -p {}/'.format(path))
-        run('tar -xzf /tmp/{} -C {}'.format(archive, path))
-        run('rm /tmp/{}'.format(archive))
-        run('mv {}/web_static/* {}'.format(path, path))
-        run('rm -rf {}/web_static'.format(path))
-        run('rm -rf {}'.format(current))
-        run('ln -s {} {}'.format(path, current))
-        print('New version deployed!')
-        return True
-    except:
-        return False
+api.env.hosts = ['182897-web-01', '182897-web-02']
+api.env.hosts = ['100.26.164.88', '54.83.163.5']
+api.env.user = 'ubuntu'
+"""api.env.key_filename = '~/.ssh/holberton'"""
 
 
 def deploy():
-    """distributes an archive to web servers"""
-    path = do_pack()
-    if path is None:
+    """Wrapper function to pack html files into tarball and transfer
+    to web servers."""
+    return do_deploy(do_pack())
+
+
+@decorators.runs_once
+def do_pack():
+    """Function to create tarball of webstatic files from the web_static
+    folder in Airbnb_v2.
+
+    Returns: path of .tgz file on success, False otherwise
+    """
+    with api.settings(warn_only=True):
+        isdir = os.path.isdir('versions')
+        if not isdir:
+            mkdir = api.local('mkdir versions')
+            if mkdir.failed:
+                return False
+        suffix = datetime.now().strftime('%Y%m%d%M%S')
+        path = 'versions/web_static_{}.tgz'.format(suffix)
+        tar = api.local('tar -cvzf {} web_static'.format(path))
+        if tar.failed:
+            return False
+        size = os.stat(path).st_size
+        print('web_static packed: {} -> {}Bytes'.format(path, size))
+        return path
+
+
+def do_deploy(archive_path):
+    """Function to transfer `archive_path` to web servers.
+
+    Args:
+        archive_path (str): path of the .tgz file to transfer
+
+    Returns: True on success, False otherwise.
+    """
+    if not os.path.isfile(archive_path):
         return False
-    f = do_deploy(path)
-    return f
+    with api.cd('/tmp'):
+        basename = os.path.basename(archive_path)
+        root, ext = os.path.splitext(basename)
+        outpath = '/data/web_static/releases/{}'.format(root)
+        try:
+            putpath = api.put(archive_path)
+            if files.exists(outpath):
+                api.run('rm -rdf {}'.format(outpath))
+            api.run('mkdir -p {}'.format(outpath))
+            api.run('tar -xzf {} -C {}'.format(putpath[0], outpath))
+            api.run('rm -f {}'.format(putpath[0]))
+            api.run('mv -u {}/web_static/* {}'.format(outpath, outpath))
+            api.run('rm -rf {}/web_static'.format(outpath))
+            api.run('rm -rf /data/web_static/current')
+            api.run('ln -s {} /data/web_static/current'.format(outpath))
+            print('New version deployed!')
+        except:
+            return False
+        else:
+            return True
