@@ -12,7 +12,7 @@ port = 5000
 @app.route('/')
 def hello_hbnb():
     # says Hello HBNB when curl'd
-    return("Hello HBNB")
+    return("Hello HBNB!")
 
 
 if __name__ == "__main__":

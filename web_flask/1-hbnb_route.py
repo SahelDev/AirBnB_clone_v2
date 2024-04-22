@@ -12,7 +12,7 @@ port = 5000
 @app.route('/')
 def hello_hbnb():
     # says Hello HBNB when curl
-    return("Hello HBNB")
+    return("Hello HBNB!")
 
 
 @app.route('/hbnb')
