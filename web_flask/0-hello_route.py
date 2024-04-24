@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 
-# start a flask web app
+'''start a flask web app'''
 from flask import Flask
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -11,7 +11,7 @@ port = 5000
 
 @app.route('/')
 def hello_hbnb():
-    # says Hello HBNB when curl'd
+    '''says Hello HBNB when curl'd'''
     return("Hello HBNB!")
 
 
