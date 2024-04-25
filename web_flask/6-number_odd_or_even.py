@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Simple Flask web application"""
 from flask import Flask, render_template
-app = Flask('__name__')
+app = Flask('web_flask')
 app.url_map.strict_slashes = False
 
 
@@ -47,7 +47,7 @@ def hello_route6(n):
 @app.route('/number_odd_or_even/<int:n>')
 def hello_route7(n):
     """Return rendered html containing logic that determines whether
-    `n` is even or odd and displays the result in an <h1> tag"""
+     <n> is even or odd and displays the result in an <h1> tag"""
     return render_template('6-number_odd_or_even.html', n=n)
 
 
