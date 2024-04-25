@@ -17,17 +17,15 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """
-        Retrieves a dictionary containing all objects, optionally
-        filtered by class.
-        """
-        if (not cls):
+        """returns the dictionary __objects"""
+        if not cls:
             return self.__objects
-        result = {}
-        for key in self.__objects.keys():
-            if (key.split(".")[0] == cls.__name__):
-                result.update({key: self.__objects[key]})
-        return result
+        elif type(cls) == str:
+            return {k: v for k, v in self.__objects.items()
+                    if v.__class__.__name__ == cls}
+        else:
+            return {k: v for k, v in self.__objects.items()
+                    if v.__class__ == cls}
 
     def new(self, obj):
         """
