@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 """Database storage engine using SQLAlchemy with a mysql+mysqldb database
 connection.
 """
@@ -24,10 +26,12 @@ name2class = {
 
 
 class DBStorage:
+    """Class for database"""
     __engine = None
     __session = None
 
     def __init__(self):
+        """Initializes storage"""
         user = os.getenv('HBNB_MYSQL_USER')
         passwd = os.getenv('HBNB_MYSQL_PWD')
         host = os.getenv('HBNB_MYSQL_HOST')
@@ -38,6 +42,7 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
+        """returns all objects of cls"""
         if not self.__session:
             self.reload()
         objects = {}
@@ -61,12 +66,15 @@ class DBStorage:
         self.__session = Session()
 
     def new(self, obj):
+        """add object to db"""
         self.__session.add(obj)
 
     def save(self):
+        """commit changes to db"""
         self.__session.commit()
 
     def delete(self, obj=None):
+        """delete obj from db"""
         if not self.__session:
             self.reload()
         if obj:
