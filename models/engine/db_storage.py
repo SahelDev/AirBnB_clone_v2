@@ -53,10 +53,12 @@ class DBStorage:
         return objects
 
     def reload(self):
+        """reload the session"""
+        Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine,
                                        expire_on_commit=False)
-        Base.metadata.create_all(self.__engine)
-        self.__session = scoped_session(session_factory)
+        Session = scoped_session(session_factory)
+        self.__session = Session()
 
     def new(self, obj):
         self.__session.add(obj)
@@ -72,4 +74,4 @@ class DBStorage:
 
     def close(self):
         """Dispose of current session if active"""
-        self.__session.remove()
+        self.__session.close()
