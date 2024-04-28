@@ -7,7 +7,7 @@ from models.city import City
 import models
 from models.amenity import Amenity
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Table
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, VARCHAR, Table
 from sqlalchemy.orm import relationship
 
 metadata = Base.metadata
@@ -43,7 +43,7 @@ class Place(BaseModel, Base):
 
     __tablename__ = 'places'
 
-    city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
+    city_id = Column(String(60), ForeignKey('cities.state_id'), nullable=False)
     user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(String(1024), nullable=True)
