@@ -46,9 +46,13 @@ def hello_route6(n):
 
 @app.route('/number_odd_or_even/<int:n>')
 def hello_route7(n):
-    """Return rendered html containing logic that determines whether
-     <n> is even or odd and displays the result in an <h1> tag"""
-    return render_template('6-number_odd_or_even.html', n=n)
+   """display a HTML page only if n is an integer"""
+    if n % 2 == 0:
+        evenness = 'even'
+    else:
+        evenness = 'odd'
+    return render_template('6-number_odd_or_even.html', n=n,
+                           evenness=evenness) 
 
 
 if __name__ == "__main__":
